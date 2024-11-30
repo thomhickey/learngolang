@@ -1,0 +1,145 @@
+# Go Code Style and Best Practices 2024
+
+## Project Structure
+- Use cmd/ for executables
+- Use internal/ for private implementation
+- Use pkg/ for shared libraries
+- Keep main packages small, delegate to internal packages
+
+## Code Style
+- Use descriptive variable names:
+  ✅ ctx *gin.Context
+  ❌ c *gin.Context
+
+  ✅ router *gin.Engine
+  ❌ r *gin.Engine
+
+  ✅ err error
+  ❌ e error
+
+- Use Any instead of interface{}:
+  ✅ func Process(data any) error
+  ❌ func Process(data interface{}) error
+
+## Function Design
+- Keep functions focused and small
+- Return early for error conditions
+- Use meaningful parameter and return value names
+- Prefer pure functions where possible
+
+## Error Handling
+- Error strings should not be capitalized
+- Error strings should not end with punctuation
+- Use error wrapping: fmt.Errorf("doing task: %w", err)
+- Create custom error types for specific cases
+
+## Testing
+- Use table-driven tests
+- Use meaningful test names: TestValidateUser_InvalidEmail
+- Keep test files next to implementation: user.go, user_test.go
+- Use testify/assert for cleaner assertions
+- Use subtests for better organization
+
+## Database
+- Use prepared statements
+- Use meaningful parameter names in queries
+- Structure SQL for readability
+- Use transactions where appropriate
+
+## HTTP Handlers
+- Use descriptive handler names: CreateUser, not Create
+- Use ctx for context parameter
+- Group related handlers in their own packages
+- Use proper HTTP status codes
+
+## Configuration
+- Use environment variables for configuration
+- Use .env for local development
+- Use structured config types
+- Validate configuration at startup
+
+## Dependencies
+- Use go.mod for dependency management
+- Pin dependency versions
+- Regularly update dependencies
+- Minimize external dependencies
+
+## Documentation
+- Write meaningful package documentation
+- Document exported functions and types
+- Include examples in documentation
+- Use proper formatting in comments
+
+## API Design
+- Use versioned APIs
+- Use proper HTTP methods
+- Return consistent error responses
+- Use proper content types
+
+## Middleware
+- Keep middleware focused
+- Chain middleware appropriately
+- Use meaningful middleware names
+- Handle errors appropriately
+
+## Logging
+- Use structured logging
+- Include relevant context
+- Use appropriate log levels
+- Don't log sensitive information
+
+## Security
+- Use proper authentication
+- Validate all input
+- Use HTTPS
+- Follow OWASP guidelines
+
+## Performance
+- Use proper connection pooling
+- Cache appropriately
+- Use efficient data structures
+- Profile before optimizing
+
+## Examples
+
+✅ Good:
+```go
+func CreateUser(ctx *gin.Context) {
+    var newUser User
+    if err := ctx.ShouldBindJSON(&newUser); err != nil {
+        ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
+        return
+    }
+}
+```
+
+❌ Bad:
+```go
+func Create(c *gin.Context) {
+    var u User
+    if e := c.ShouldBindJSON(&u); e != nil {
+        c.JSON(400, gin.H{"error": e.Error()})
+        return
+    }
+}
+```
+
+✅ Good:
+```go
+type Config struct {
+    ServerPort int
+    DBConfig   DatabaseConfig
+}
+
+func NewConfig() (*Config, error) {
+    // Implementation
+}
+```
+
+❌ Bad:
+```go
+var (
+    port = os.Getenv("PORT")
+    db   = os.Getenv("DB")
+)
+``` 
